@@ -1,11 +1,15 @@
 package com.example.gpstracker
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_CANCEL_CURRENT
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -17,12 +21,19 @@ class MyForegroundService: Service() {
     private val CHANNEL_ID = "ForegroundServiceChannel"
     private var timer: Timer? = null
 
+    private lateinit var locationManager: LocationManager
+    private lateinit var locationListener: LocationListener
+
     override fun onCreate() {
         super.onCreate()
+
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationListener = MyLocationListener()
 
         Log.d(TAG, "service create")
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand")
 
@@ -44,12 +55,18 @@ class MyForegroundService: Service() {
 
         startLogging()
 
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, locationListener)
+
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
         stopLogging()
+
+        locationManager.removeUpdates(locationListener)
+
         Log.d(TAG, "onDestroy")
     }
 

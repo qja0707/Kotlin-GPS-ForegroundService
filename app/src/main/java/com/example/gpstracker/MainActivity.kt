@@ -24,15 +24,13 @@ import com.example.gpstracker.ui.theme.GpsTrackerTheme
 val TAG = "gpstracker"
 
 class MainActivity : ComponentActivity() {
-    private lateinit var locationManager: LocationManager
-    private lateinit var locationListener: LocationListener
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        locationListener = MyLocationListener()
+
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -49,8 +47,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        StartButton(locationManager, locationListener, ::startForegroundService)
-                        EndButton(locationManager, locationListener, ::stopForegroundService)
+                        StartButton(::startForegroundService)
+                        EndButton(::stopForegroundService)
                     }
                 }
             }
@@ -74,11 +72,10 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("MissingPermission")
 @Composable
-fun StartButton(locationManager: LocationManager, locationListener: LocationListener, onButtonClick: ()-> Unit) {
+fun StartButton(onButtonClick: ()-> Unit) {
     Button(onClick = {
         Log.d(TAG,"start")
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0f, locationListener)
+
 
         onButtonClick()
     }) {
@@ -86,10 +83,10 @@ fun StartButton(locationManager: LocationManager, locationListener: LocationList
     }
 }
 @Composable
-fun EndButton(locationManager: LocationManager, locationListener: LocationListener, onButtonClick: ()-> Unit) {
+fun EndButton(onButtonClick: ()-> Unit) {
     Button(onClick = {
         Log.d(TAG,"end")
-        locationManager.removeUpdates(locationListener)
+
 
         onButtonClick()
     }) {
